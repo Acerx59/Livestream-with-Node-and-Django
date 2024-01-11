@@ -1,0 +1,34 @@
+{% load static %} {% block content %}
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signs Stream</title>
+  <link rel="stylesheet" href="{% static 'login.css' %}" />
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="title-text">
+      <div class="title login">Login Form</div>
+    </div>
+    <div class="form-inner">
+    <form action="{% url 'userlogin' %}" class="login" method="POST">
+      {% csrf_token %}
+      <div class="field">
+        <input type="text" placeholder="username" name="username" required />
+      </div>
+      <div class="field">
+        <input type="password" placeholder="password" name="password" required />
+      </div>
+      <div class="pass-link"><a href="#">Forgot password?</a></div>
+      <div class="field btn">
+        <div class="btn-layer"></div>
+        <input type="submit" name="submit" value="Login">
+      </div>
+      <div class="signup-link">Not a member? <a href="{% url 'signup' %}">Signup now</a></div>
+    </form>
+  </div>
+</div>
+</body>
+{% endblock content %}

@@ -1,0 +1,130 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signs_Streams</title>
+    <link rel="stylesheet" href="{% static 'stream.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <div class="logo">
+        <a href="https://signsmediake.com/">
+          <img
+            src="{% static 'img/logos/Logo.jpeg' %}"
+            alt="Logo"
+            width="48"
+            height="48"
+          />
+        </a>
+      </div>
+      <h1>Signs_Streams</h1>
+    </header>
+    <nav>
+      {% if user.is_authenticated %}
+      <p>User is authenticated: {{ user.username }}</p>
+      {% else %}
+      <p>User is not authenticated</p>
+      {% endif %} {% if user.is_authenticated %}
+      <a href="{% url 'logout' %}" style="color: #000c57">Logout</a>
+      <hr />
+      <h2>Welcome <span>{{request.user.username}}</span></h2>
+      {% else %}
+      <a href="{% url 'signup' %}">
+        <img
+          src="{% static 'img/logos/user.png' %}"
+          alt="Logo"
+          width="36"
+          height="36"
+        />
+      </a>
+      <h2 style="font-size: 12px">Login to access this website!</h2>
+      {% endif %}
+    </nav>
+    <div class="stream">
+      <video controls width="948" height="648">
+        <source src="http://localhost:3000/video" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="chat-container">
+      <div class="textbox" id="chat-box">
+        <h1>Chat Room: {{ room.name }}</h1>
+        <!-- Live chat messages will be appended here -->
+      </div>
+      <textarea
+        id="chat-box"
+        class="chat-box"
+        rows="10"
+        readonly
+      ></textarea>
+      <form id="chat-form" onsubmit="sendMessage(); return false;">
+        <input
+            type="text"
+            id="message-input"
+            class="chat-input"
+            placeholder="Type your message"
+        />
+        <button
+            type="button"
+            id="submit"
+            class="submit-btn"
+            value="Send"
+        >
+            Send
+        </button>
+
+
+    </form>
+    </div>
+    {% else %}
+    <div class="login-prompt">
+      <h2>Login to access the chat!</h2>
+    </div>
+    {% endif %}
+  </body>
+
+  {{ request.user.username | json_script:"user_username"}}
+  {{ room_name | json_script:"room-name" }}
+  <script>
+    const user_username = JSON.parse(document.getElementById('user_username').textContent);
+    const roomName = "your_fixed_room_name";  // Replace with your desired fixed room name
+
+    document.querySelector('#submit').onclick = function (e) {
+        const messageInputDom = document.querySelector('#message-input');
+        const message = messageInputDom.value;
+
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'username': user_username
+        }));
+        
+        messageInputDom.value = '';
+    };
+
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/chat/' + roomName + '/'
+    );
+
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        console.log(data);
+        document.querySelector('#chat-box').value += (data.username + ': ' + data.message + '\n');
+    };
+</script>
+
+
+</html>
